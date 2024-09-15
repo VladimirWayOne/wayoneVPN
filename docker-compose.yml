@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  vpn_db:
+    image: postgres
+    restart: always
+    env_file: ".env"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PWD}
+    volumes:
+      - "db:/var/lib/postgresql/data"
+      - "./db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql"
+    ports:
+      - 45432:5432
+   
+
+  vpn_bot:
+    container_name: vpn_bot
+    restart: always
+    build: vpn_bot/
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_PWD=${DB_PWD}
+      - DB_USER = ${DB_USER}
+      - BOT_TOKEN=${BOT_TOKEN}
+
+    command:
+      "python -u app.py"
+    depends_on:
+      - vpn_db
+  
+volumes:
+  db:
+      
